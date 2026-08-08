@@ -1,4 +1,9 @@
-import { isAddress } from 'ethers';
-const address = import.meta.env.VITE_NEXORA_CONTRACT_ADDRESS?.trim(); const configuredChain = import.meta.env.VITE_NEXORA_CHAIN_ID?.trim();
-export const contractConfig = { address: isAddress(address ?? '') ? address : null, chainId: configuredChain ? BigInt(configuredChain) : null };
-export function configurationError(chainId) { if (!contractConfig.address) return 'Nexora contract address is not configured.'; if (contractConfig.chainId && chainId && contractConfig.chainId !== chainId) return 'Your wallet is connected to the wrong network for this Nexora deployment.'; return null; }
+// Nexora Contract Configuration
+export const NEXORA_SEPOLIA_ADDRESS = "0x1FCa8Bf17249aBd53672F6D0544bAE2dD1D3B75F";
+export const NEXORA_LOCAL_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+
+export const DEFAULT_CONTRACT_ADDRESS = 
+  import.meta.env.VITE_NEXORA_CONTRACT_ADDRESS || NEXORA_SEPOLIA_ADDRESS;
+
+export const SEPOLIA_CHAIN_ID = 11155111;
+export const LOCALHOST_CHAIN_ID = 31337;
