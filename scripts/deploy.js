@@ -1,22 +1,52 @@
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
+const fs = require("fs");
 
 async function main() {
-  console.log("Deploying Nexora smart contract...");
+  console.log("Deploying Nexora to:", hre.network.name);
 
-  const [deployer] = await ethers.getSigners();
-  console.log("Deploying with account:", deployer.address);
-  console.log("Account balance:", (await ethers.provider.getBalance(deployer.address)).toString());
+  const [deployer] = await hre.ethers.getSigners();
 
-  const NexoraFactory = await ethers.getContractFactory("Nexora");
-  const nexora = await NexoraFactory.deploy();
+  console.log("Deployer address:", deployer.address);
+
+  const balance = await hre.ethers.provider.getBalance(deployer.address);
+
+  console.log(
+    "Deployer balance:",
+    hre.ethers.formatEther(balance),
+    "ETH"
+  );
+
+  const Nexora = await hre.ethers.getContractFactory("Nexora");
+
+  console.log("Deploying contract...");
+
+  const nexora = await Nexora.deploy();
 
   await nexora.waitForDeployment();
 
-  const contractAddress = await nexora.getAddress();
-  console.log("\n==========================================");
-  console.log("Nexora smart contract successfully deployed!");
-  console.log("Contract Address:", contractAddress);
-  console.log("==========================================\n");
+  const address = await nexora.getAddress();
+
+  const deploymentInfo = {
+    contract: "Nexora",
+    address: address,
+    network: "sepolia",
+    chainId: 11155111,
+    deployer: deployer.address,
+    deployedAt: new Date().toISOString()
+  };
+
+  fs.writeFileSync(
+    "deployment.json",
+    JSON.stringify(deploymentInfo, null, 2)
+  );
+
+  console.log("====================================");
+  console.log("NEXORA DEPLOYED SUCCESSFULLY");
+  console.log("Contract address:", address);
+  console.log("Network: sepolia");
+  console.log("Chain ID: 11155111");
+  console.log("Deployment information saved to deployment.json");
+  console.log("====================================");
 }
 
 main().catch((error) => {
