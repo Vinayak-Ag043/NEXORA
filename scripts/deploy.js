@@ -2,14 +2,12 @@ const hre = require("hardhat");
 const fs = require("fs");
 
 async function main() {
-  console.log("Deploying Nexora to:", hre.network.name);
+  console.log("Deploying Nexora to network:", hre.network.name);
 
   const [deployer] = await hre.ethers.getSigners();
-
   console.log("Deployer address:", deployer.address);
 
   const balance = await hre.ethers.provider.getBalance(deployer.address);
-
   console.log(
     "Deployer balance:",
     hre.ethers.formatEther(balance),
@@ -17,11 +15,9 @@ async function main() {
   );
 
   const Nexora = await hre.ethers.getContractFactory("Nexora");
-
   console.log("Deploying contract...");
 
   const nexora = await Nexora.deploy();
-
   await nexora.waitForDeployment();
 
   const address = await nexora.getAddress();
@@ -29,8 +25,8 @@ async function main() {
   const deploymentInfo = {
     contract: "Nexora",
     address: address,
-    network: "sepolia",
-    chainId: 11155111,
+    network: hre.network.name,
+    chainId: hre.network.config.chainId || 31337,
     deployer: deployer.address,
     deployedAt: new Date().toISOString()
   };
@@ -43,8 +39,7 @@ async function main() {
   console.log("====================================");
   console.log("NEXORA DEPLOYED SUCCESSFULLY");
   console.log("Contract address:", address);
-  console.log("Network: sepolia");
-  console.log("Chain ID: 11155111");
+  console.log("Network:", hre.network.name);
   console.log("Deployment information saved to deployment.json");
   console.log("====================================");
 }
