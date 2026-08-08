@@ -125,17 +125,7 @@ function Hero() {
 
           {/* Main Glass Card */}
           <div className="relative flex h-72 w-72 items-center justify-center rounded-[3rem] border border-white/10 bg-white/5 shadow-2xl shadow-violet-900/30 backdrop-blur-xl">
-            {/* Chain links */}
-            <Link2
-              className="absolute left-8 top-8 rotate-45 text-cyan-400"
-              size={32}
-            />
-            <Vote
-              className="absolute bottom-8 right-8 -rotate-12 text-violet-400"
-              size={32}
-            />
-
-            {/* Inner Floating Nexora Mark */}
+            {/* Inner Floating Nexora Mark Emblem */}
             <motion.div
               animate={{ y: [0, -8, 0] }}
               transition={{

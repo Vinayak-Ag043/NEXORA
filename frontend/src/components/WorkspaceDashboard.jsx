@@ -11,12 +11,14 @@ import {
   ThumbsDown,
   Check,
   Activity,
-  AlertCircle
+  AlertCircle,
+  MessageSquare
 } from "lucide-react";
 import { useWallet } from "../context/WalletContext";
 import { useNexora } from "../hooks/useNexora";
 import CreateGroupModal from "./CreateGroupModal";
 import CreateProposalModal from "./CreateProposalModal";
+import GroupChat from "./GroupChat";
 import NexoraMark from "./NexoraMark";
 
 function WorkspaceDashboard() {
@@ -35,6 +37,8 @@ function WorkspaceDashboard() {
 
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
+  const [activeChatGroup, setActiveChatGroup] = useState(null);
+  const [chatNotice, setChatNotice] = useState(null);
   const [copied, setCopied] = useState(false);
 
   const shortenAddress = (value) => {
@@ -169,6 +173,17 @@ function WorkspaceDashboard() {
           </div>
         )}
 
+        {/* Membership & Chat Notice Alert */}
+        {chatNotice && (
+          <div className="mb-8 flex items-center justify-between rounded-2xl border border-amber-400/30 bg-amber-400/10 px-5 py-3 text-xs text-amber-300">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={16} />
+              <span>{chatNotice}</span>
+            </div>
+            <button onClick={() => setChatNotice(null)} className="text-amber-400 hover:text-white font-bold">✕</button>
+          </div>
+        )}
+
         {/* SECTION 1: GROUPS */}
         <div className="mb-16">
           <div className="mb-6 flex items-center justify-between">
@@ -216,25 +231,47 @@ function WorkspaceDashboard() {
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-slate-500">Creator</p>
-                      <p className="font-mono text-xs text-cyan-300">{shortenAddress(group.creator)}</p>
+                  <div className="mt-6 pt-4 border-t border-white/10 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-slate-500">Creator</p>
+                        <p className="font-mono text-xs text-cyan-300">{shortenAddress(group.creator)}</p>
+                      </div>
+
+                      {group.isMember ? (
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-3.5 py-1.5 rounded-xl cursor-default select-none">
+                          <CheckCircle2 size={14} /> ✓ Member
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => joinGroup(group.id)}
+                          disabled={!account || actionLoading || group.isMember}
+                          className="rounded-xl bg-violet-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-violet-500 disabled:opacity-40"
+                        >
+                          Join Group
+                        </button>
+                      )}
                     </div>
 
-                    {group.isMember ? (
-                      <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-3.5 py-1.5 rounded-xl cursor-default select-none">
-                        <CheckCircle2 size={14} /> ✓ Member
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => joinGroup(group.id)}
-                        disabled={!account || actionLoading || group.isMember}
-                        className="rounded-xl bg-violet-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-violet-500 disabled:opacity-40"
-                      >
-                        Join Group
-                      </button>
-                    )}
+                    <button
+                      onClick={() => {
+                        if (!group.isMember) {
+                          setChatNotice("Join this group to access the chat.");
+                          setTimeout(() => setChatNotice(null), 4000);
+                          setActiveChatGroup(group);
+                          return;
+                        }
+                        setActiveChatGroup(group);
+                      }}
+                      className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-xs font-semibold transition ${
+                        group.isMember
+                          ? "border border-violet-400/30 bg-violet-600/20 text-violet-300 hover:bg-violet-600/30"
+                          : "border border-white/10 bg-white/5 text-slate-400 hover:text-slate-300"
+                      }`}
+                    >
+                      <MessageSquare size={15} />
+                      Group Chat
+                    </button>
                   </div>
                 </motion.div>
               ))}
@@ -417,6 +454,11 @@ function WorkspaceDashboard() {
         isOpen={isProposalModalOpen}
         onClose={() => setIsProposalModalOpen(false)}
         groups={groups}
+      />
+      <GroupChat
+        isOpen={Boolean(activeChatGroup)}
+        onClose={() => setActiveChatGroup(null)}
+        group={activeChatGroup}
       />
     </section>
   );
